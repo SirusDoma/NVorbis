@@ -32,7 +32,11 @@ namespace NVorbis.Ogg
         /// </summary>
         public int[] StreamSerials
         {
-            get { return System.Linq.Enumerable.ToArray<int>(_packetReaders.Keys); }
+            get
+            {
+                var keys = new List<int>(_packetReaders.Keys);
+                return keys.ToArray();
+            }
         }
 
         /// <summary>

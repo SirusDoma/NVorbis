@@ -7,7 +7,6 @@
  ***************************************************************************/
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using System.IO;
 
@@ -181,7 +180,20 @@ namespace NVorbis
 
         bool ProcessStreamHeader(DataPacket packet)
         {
-            if (!packet.ReadBytes(7).SequenceEqual(new byte[] { 0x01, 0x76, 0x6f, 0x72, 0x62, 0x69, 0x73 }))
+            bool equal = true;
+            byte[] sequence = new byte[] { 0x01, 0x76, 0x6f, 0x72, 0x62, 0x69, 0x73 };
+            byte[] packets  = packet.ReadBytes(7);
+
+            for (int i = 0; i < 7; i++)
+            {
+                if (packets[i] != sequence[i])
+                {
+                    equal = false;
+                    break;
+                }
+            }
+
+            if (!equal)
             {
                 // don't mark the packet as done... it might be used elsewhere
                 _glueBits += packet.Length * 8;
@@ -222,7 +234,20 @@ namespace NVorbis
 
         bool LoadComments(DataPacket packet)
         {
-            if (!packet.ReadBytes(7).SequenceEqual(new byte[] { 0x03, 0x76, 0x6f, 0x72, 0x62, 0x69, 0x73 }))
+            bool equal = true;
+            byte[] sequence = new byte[] { 0x03, 0x76, 0x6f, 0x72, 0x62, 0x69, 0x73 };
+            byte[] packets  = packet.ReadBytes(7);
+
+            for (int i = 0; i < 7; i++)
+            {
+                if (packets[i] != sequence[i])
+                {
+                    equal = false;
+                    break;
+                }
+            }
+
+            if (!equal)
             {
                 return false;
             }
@@ -247,7 +272,20 @@ namespace NVorbis
 
         bool LoadBooks(DataPacket packet)
         {
-            if (!packet.ReadBytes(7).SequenceEqual(new byte[] { 0x05, 0x76, 0x6f, 0x72, 0x62, 0x69, 0x73 }))
+            bool equal = true;
+            byte[] sequence = new byte[] { 0x05, 0x76, 0x6f, 0x72, 0x62, 0x69, 0x73 };
+            byte[] packets  = packet.ReadBytes(7);
+
+            for (int i = 0; i < 7; i++)
+            {
+                if (packets[i] != sequence[i])
+                {
+                    equal = false;
+                    break;
+                }
+            }
+
+            if (!equal)
             {
                 return false;
             }
@@ -958,10 +996,22 @@ namespace NVorbis
         {
             get
             {
-                var samples = _sampleCountHistory.Sum();
+                int sampleNum = 0;
+                foreach (var i in _sampleCountHistory)
+                {
+                    sampleNum += i;
+                }
+
+                var samples = sampleNum;
                 if (samples > 0)
                 {
-                    return (int)((long)_bitsPerPacketHistory.Sum() * _sampleRate / samples);
+                    int bpp = 0;
+                    foreach (var i in _bitsPerPacketHistory)
+                    {
+                        bpp += i;
+                    }
+
+                    return (int)((long)bpp * _sampleRate / samples);
                 }
                 else
                 {

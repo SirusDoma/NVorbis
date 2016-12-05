@@ -6,7 +6,7 @@
  *                                                                          *
  ***************************************************************************/
 using System;
-using System.Linq;
+using System.Collections.Generic;
 using System.IO;
 
 namespace NVorbis
@@ -85,7 +85,16 @@ namespace NVorbis
                 }
             }
             // figure out the maximum bit size; if all are unused, don't do anything else
-            if ((MaxBits = Lengths.Max()) > -1)
+            int maxLength = Lengths[0];
+            for (int i = 0; i < Lengths.Length; i++)
+            {
+                if (Lengths[i] > maxLength)
+                {
+                    maxLength = Lengths[i];
+                }
+            }
+
+            if ((MaxBits = maxLength) > -1)
             {
                 int sortedCount = 0;
                 int[] codewordLengths = null;
@@ -122,9 +131,16 @@ namespace NVorbis
                     values = new int[sortedEntries];
                 }
 
-                if (!ComputeCodewords(sparse, sortedEntries, codewords, codewordLengths, len: Lengths, n: Entries, values: values)) throw new InvalidDataException();
+                if (!ComputeCodewords(sparse, sortedEntries, codewords, codewordLengths, len: Lengths, n: Entries, values: values))
+                    throw new InvalidDataException();
 
-                PrefixList = Huffman.BuildPrefixedLinkedList(values ?? Enumerable.Range(0, codewords.Length).ToArray(), codewordLengths ?? Lengths, codewords, out PrefixBitLength, out PrefixOverflowTree);
+                var list = new List<int>();
+                for (int i = 0; i < codewords.Length; i++)
+                {
+                    list.Add(i);
+                }
+
+                PrefixList = Huffman.BuildPrefixedLinkedList(values ?? list.ToArray(), codewordLengths ?? Lengths, codewords, out PrefixBitLength, out PrefixOverflowTree);
             }
         }
 

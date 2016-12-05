@@ -7,7 +7,6 @@
  ***************************************************************************/
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using System.IO;
 
@@ -189,7 +188,17 @@ namespace NVorbis
         /// </summary>
         public IVorbisStreamStatus[] Stats
         {
-            get { return _decoders.Select(d => d).Cast<IVorbisStreamStatus>().ToArray(); }
+            get
+            {
+                var decoders = new List<IVorbisStreamStatus>();
+                foreach (var d in _decoders)
+                {
+                    decoders.Add(d);
+                }
+
+                return decoders.ToArray();
+                //return _decoders.Select(d => d).Cast<IVorbisStreamStatus>().ToArray();
+            }
         }
 
         /// <summary>
